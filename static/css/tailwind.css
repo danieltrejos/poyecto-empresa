@@ -1,0 +1,10 @@
+/* npm install tailwindcss @tailwindcss/cli */
+/* npx @tailwindcss/cli -i ./static/css/tailwind.css -o ./static/css/main.css --watch */
+/* <link href="./output.css" rel="stylesheet"> */
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FEB702;
+  --color-blanco: #FFFFFF;
+  --color-negro: #282828;
+}
