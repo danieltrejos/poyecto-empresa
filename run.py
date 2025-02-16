@@ -1,8 +1,13 @@
 from flask import Flask, render_template
 
+# from modules.auth_modulo.models import UserModel
+from modules.auth_modulo.routes import auth_bp 
 
 app = Flask(__name__)
 
+
+# Rutas principales de login y authentication
+""" 
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -19,6 +24,16 @@ def Recuperacion():
 @app.route('/registro')
 def Registro():
     return render_template('Registro.html')
+
+"""
+
+# Registro de blueprint
+# blueprint para usuarios
+app.register_blueprint(auth_bp, url_prefix='/')
+
+
+
+print(app.url_map)
 
 if __name__ == '__main__':
     app.run(debug=True)
