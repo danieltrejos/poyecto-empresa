@@ -2,6 +2,7 @@ from flask import Flask, render_template
 
 # from modules.auth_modulo.models import UserModel
 from modules.auth_modulo.routes import auth_bp 
+from modules.main.routes import main_bp
 
 app = Flask(__name__)
 
@@ -29,7 +30,8 @@ def Registro():
 
 # Registro de blueprint
 # blueprint para usuarios
-app.register_blueprint(auth_bp, url_prefix='/')
+app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(main_bp, url_prefix='/')
 
 
 
