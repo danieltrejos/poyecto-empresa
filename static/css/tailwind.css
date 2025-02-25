@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 /* npm install tailwindcss @tailwindcss/cli */
 /* npx @tailwindcss/cli -i ./static/css/tailwind.css -o ./static/css/main.css --watch */
 /* <link href="./output.css" rel="stylesheet"> */
@@ -19,4 +20,9 @@
   --color-blanco: #FFFFFF;
   --color-negro: #282828;
   --color-fondo: #E3E6E6;
+
+  --font-roboto: "Roboto", sans-serif;
 }
+
+
+@import "tailwindcss";

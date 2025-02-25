@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CRUD Modal con JavaScript y Tailwind</title>
+    <!-- Carga Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Botón para abrir el modal -->
+    <div class="container mx-auto my-8">
+        <button id="openModalBtn"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
+            Abrir Modal
+        </button>
+    </div>
+
+    <!-- Modal (oculto por defecto) -->
+    <div id="crud-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="bg-white rounded-lg shadow p-6 w-full max-w-md relative">
+            <!-- Botón de cierre -->
+            <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-500 text-2xl">&times;</button>
+            <!-- Título del modal -->
+            <h3 class="text-lg font-semibold mb-4">Crear / Editar Producto</h3>
+            <!-- Formulario -->
+            <form id="productForm" class="grid gap-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-900">Nombre</label>
+                    <input type="text" id="name" required placeholder="Escribe el nombre"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                </div>
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-900">Precio</label>
+                    <input type="number" id="price" required placeholder="Ej. 2999"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                </div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-900">Categoría</label>
+                    <select id="category"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                        <option value="">Selecciona categoría</option>
+                        <option value="TV">TV/Monitores</option>
+                        <option value="PC">PC</option>
+                        <option value="GA">Gaming/Console</option>
+                        <option value="PH">Phones</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-900">Descripción</label>
+                    <textarea id="description" rows="4" placeholder="Escribe la descripción del producto"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"></textarea>
+                </div>
+                <button type="submit"
+                    class="bg-blue-700 text-white rounded-lg text-sm px-5 py-2.5 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 inline-flex items-center">
+                    <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    Guardar Producto
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla para mostrar los productos -->
+    <div class="container mx-auto mt-8">
+        <h2 class="text-xl font-bold mb-4">Lista de Productos</h2>
+        <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="py-2 px-4 border">Nombre</th>
+                    <th class="py-2 px-4 border">Precio</th>
+                    <th class="py-2 px-4 border">Categoría</th>
+                    <th class="py-2 px-4 border">Descripción</th>
+                    <th class="py-2 px-4 border">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody">
+                <!-- Se agregarán filas dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Código JavaScript -->
+    <script>
+        // Elementos del DOM
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modal = document.getElementById('crud-modal');
+        const productForm = document.getElementById('productForm');
+        const productTableBody = document.getElementById('productTableBody');
+
+        // Array para almacenar productos
+        let products = [];
+        // Variable para saber si estamos editando (-1 = nuevo producto)
+        let editingIndex = -1;
+
+        // Función para abrir el modal
+        openModalBtn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+
+        // Función para cerrar el modal
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            resetForm();
+        });
+
+        // Cerrar el modal al hacer clic fuera del contenido
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                resetForm();
+            }
+        });
+
+        // Función para reiniciar el formulario y estado de edición
+        function resetForm() {
+            productForm.reset();
+            editingIndex = -1;
+        }
+
+        // Función para renderizar la tabla de productos
+        function renderProducts() {
+            productTableBody.innerHTML = '';
+            products.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td class="py-2 px-4 border">${product.name}</td>
+          <td class="py-2 px-4 border">${product.price}</td>
+          <td class="py-2 px-4 border">${product.category}</td>
+          <td class="py-2 px-4 border">${product.description}</td>
+          <td class="py-2 px-4 border">
+            <button data-index="${index}" class="editBtn bg-green-500 text-white px-2 py-1 rounded">Editar</button>
+            <button data-index="${index}" class="deleteBtn bg-red-500 text-white px-2 py-1 rounded ml-2">Eliminar</button>
+          </td>
+        `;
+                productTableBody.appendChild(tr);
+            });
+
+            // Asignar eventos a los botones de editar y eliminar
+            document.querySelectorAll('.editBtn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+                    editProduct(index);
+                });
+            });
+            document.querySelectorAll('.deleteBtn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+                    deleteProduct(index);
+                });
+            });
+        }
+
+        // Manejo del envío del formulario (crear o actualizar producto)
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const price = document.getElementById('price').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+
+            const productData = { name, price, category, description };
+
+            if (editingIndex === -1) {
+                // Crear nuevo producto
+                products.push(productData);
+            } else {
+                // Actualizar producto existente
+                products[editingIndex] = productData;
+            }
+            renderProducts();
+            modal.classList.add('hidden');
+            resetForm();
+        });
+
+        // Función para editar un producto
+        function editProduct(index) {
+            editingIndex = index;
+            const product = products[index];
+            document.getElementById('name').value = product.name;
+            document.getElementById('price').value = product.price;
+            document.getElementById('category').value = product.category;
+            document.getElementById('description').value = product.description;
+            modal.classList.remove('hidden');
+        }
+
+        // Función para eliminar un producto
+        function deleteProduct(index) {
+            products.splice(index, 1);
+            renderProducts();
+        }
+    </script>
+</body>
+
+</html>
